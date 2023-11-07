@@ -69,6 +69,63 @@ void delete_rbtree(rbtree *t) {
     free(t);
 }
 
+/*
+ * RB트리를 왼쪽으로 회전하는 함수
+ * 기준 노드의 오른쪽 자식의 왼쪽 서브 트리는 기준 노드의 오른쪽 서브트리로 변환
+ * 기준 노드의 오른쪽 자식이 기준 노드의 위치를 차지
+ * 기준 노드는 새로운 부모 노드의 왼쪽 자식으로 변환
+ * 
+ */
+void left_rotate(rbtree *t, node_t *x) {
+    node_t *y = x->right; // y는 x의 오른쪽 자식입니다.
+    x->right = y->left;   // y의 왼쪽 서브트리를 x의 오른쪽 서브트리로 이동합니다.
+
+    if (y->left != t->nil) { // y의 왼쪽 서브트리가 nil이 아니면, 그 부모를 x로 설정합니다.
+        y->left->parent = x;
+    }
+
+    y->parent = x->parent; // y의 부모를 x의 부모로 설정합니다.
+
+    if (x->parent == t->nil) { // x가 루트인 경우
+        t->root = y;
+    } else if (x == x->parent->left) { // x가 부모의 왼쪽 자식인 경우
+        x->parent->left = y;
+    } else { // x가 부모의 오른쪽 자식인 경우
+        x->parent->right = y;
+    }
+
+    y->left = x;  // y의 왼쪽 자식을 x로 설정합니다.
+    x->parent = y; // x의 부모를 y로 설정합니다.
+}
+/*
+ * RB트리를 오른쪽으로 회전하는 함수
+ * 기준 노드의 왼쪽 자식의 오른쪽 서브 트리는 기준 노드의 왼쪽 서브트리로 변환
+ * 기준 노드의 왼쪽 자식이 기준 노드의 위치를 차지
+ * 기준 노드는 새로운 부모 노드의 오른쪽 자식으로 변환
+ */
+void right_rotate(rbtree *t, node_t *y) {
+    node_t *x = y->left; // x는 y의 왼쪽 자식입니다.
+    y->left = x->right;  // x의 오른쪽 서브트리를 y의 왼쪽 서브트리로 이동합니다.
+
+    if (x->right != t->nil) { // x의 오른쪽 서브트리가 nil이 아니면, 그 부모를 y로 설정합니다.
+        x->right->parent = y;
+    }
+
+    x->parent = y->parent; // x의 부모를 y의 부모로 설정합니다.
+
+    if (y->parent == t->nil) { // y가 루트인 경우
+        t->root = x;
+    } else if (y == y->parent->right) { // y가 부모의 오른쪽 자식인 경우
+        y->parent->right = x;
+    } else { // y가 부모의 왼쪽 자식인 경우
+        y->parent->left = x;
+    }
+
+    x->right = y; // x의 오른쪽 자식을 y로 설정합니다.
+    y->parent = x; // y의 부모를 x로 설정합니다.
+}
+
+
 node_t *rbtree_insert(rbtree *t, const key_t key) {
   // TODO: implement insert
   return t->root;
