@@ -1,17 +1,36 @@
 #include "rbtree.h"
 
 #include <stdlib.h>
-
+/*
+ * 새로운 레드-블랙 트리를 할당하고 메모리를 0으로 초기화.
+ * 메모리 할당에 실패하면 NULL을 반환합니다.
+ * 센티넬(nil) 노드에 대한 메모리를 할당.
+*/
 rbtree *new_rbtree(void) {
-  rbtree *p = (rbtree *)calloc(1, sizeof(rbtree));
-  // TODO: initialize struct if needed
-  return p;
+    rbtree *p = (rbtree *)calloc(1, sizeof(rbtree));
+    if (!p) {
+        return NULL;
+    }
+
+    p->nil = (node_t *)calloc(1, sizeof(node_t));
+    if (!p->nil) {
+        free(p);
+        return NULL;
+    }
+    p->nil->color = RBTREE_BLACK;
+    p->nil->parent = p->nil;
+    p->nil->left = p->nil;
+    p->nil->right = p->nil;
+    p->root = p->nil;
+
+    return p;
 }
 
 void delete_rbtree(rbtree *t) {
   // TODO: reclaim the tree nodes's memory
   free(t);
 }
+
 
 node_t *rbtree_insert(rbtree *t, const key_t key) {
   // TODO: implement insert
