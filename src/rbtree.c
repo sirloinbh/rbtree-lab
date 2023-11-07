@@ -178,11 +178,63 @@ void rbtree_insert_fixup(rbtree *t, node_t *z) {
   }
 }
 
-
+/*
+ * RB-Tree에 새로운 키를 삽입하는 함수.
+ * 이진 탐색 트리의 규칙에 맞게 키를 삽입.
+ * 삽입 후, 레드-블랙 트리의 규칙을 유지하도록 수정합니다.
+ * @param t RB-Tree의 포인터입니다.
+ * @param key 삽입할 키입니다.
+ * @return 수정된 트리의 루트 노드를 반환합니다.
+ */
 node_t *rbtree_insert(rbtree *t, const key_t key) {
-  // TODO: implement insert
+  // 새 노드를 위한 메모리 할당
+  node_t *z = (node_t *)malloc(sizeof(node_t));
+  if (z == NULL) {
+    // 메모리 할당 실패시 NULL 반환
+    return NULL;
+  }
+  
+  // 새 노드를 키로 초기화하고 빨간색으로 설정
+  z->key = key;
+  z->color = RBTREE_RED;
+  z->left = z->right = z->parent = t->nil;
+
+  // 삽입 위치를 찾기 위한 포인터
+  node_t *y = t->nil; // 새 노드의 부모가 될 포인터
+  node_t *x = t->root; // 트리를 순회하는 이터레이터
+
+  // 표준 이진 탐색 트리 삽입
+  while (x != t->nil) {
+    y = x;
+    if (z->key < x->key) {
+      x = x->left;
+    } else {
+      x = x->right;
+    }
+  }
+
+  // 새 노드의 부모 설정
+  z->parent = y;
+
+  // 새 노드가 부모의 왼쪽 자식인지 오른쪽 자식인지 결정
+  if (y == t->nil) {
+    // 트리가 비어있으면 새 노드가 루트가 됨
+    t->root = z;
+  } else if (z->key < y->key) {
+    // 새 키가 부모 키보다 작으면 왼쪽 자식
+    y->left = z;
+  } else {
+    // 새 키가 부모 키보다 크면 오른쪽 자식
+    y->right = z;
+  }
+
+  // 레드-블랙 트리의 속성을 위반했을 경우 수정하는 함수 호출
+  rbtree_insert_fixup(t, z);
+
+  // 트리가 재조정되었을 수 있으므로 트리의 루트 반환
   return t->root;
 }
+
 
 node_t *rbtree_find(const rbtree *t, const key_t key) {
   // TODO: implement find
