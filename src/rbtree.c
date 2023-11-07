@@ -74,7 +74,6 @@ void delete_rbtree(rbtree *t) {
  * 기준 노드의 오른쪽 자식의 왼쪽 서브 트리는 기준 노드의 오른쪽 서브트리로 변환
  * 기준 노드의 오른쪽 자식이 기준 노드의 위치를 차지
  * 기준 노드는 새로운 부모 노드의 왼쪽 자식으로 변환
- * 
  */
 void left_rotate(rbtree *t, node_t *x) {
     node_t *y = x->right; // y는 x의 오른쪽 자식입니다.
@@ -123,6 +122,60 @@ void right_rotate(rbtree *t, node_t *y) {
 
     x->right = y; // x의 오른쪽 자식을 y로 설정합니다.
     y->parent = x; // y의 부모를 x로 설정합니다.
+}
+/*
+ * RB트리의 균형을 맞추는 함수
+ * Case 1: 새 노드의 삼촌 노드가 빨간색인 경우 : 
+ * 부모와 삼촌을 검은색으로, 할아버지를 빨간색으로 변경하고, 할아버지 노드에 대해 재귀적으로 수행
+ * Case 2: 새 노드의 삼촌이 검은색이고, 새 노드가 부모의 오른쪽 자식인 경우 :
+ * 부모 노드를 기준으로 왼쪽 회전을 수행하고, 이 경우를 Case 3로 전환
+ * Case 3: 새 노드의 삼촌이 검은색이고, 새 노드의 부모가 왼쪽 자식인 경우 :
+ * 부모를 검은색으로, 할아버지를 빨간색으로 변경하고, 할아버지를 기준으로 오른쪽 회전을 수행
+ */
+void rbtree_insert_fixup(rbtree *t, node_t *z) {
+  while (z != t->root && z->parent->color == RBTREE_RED) {
+    if (z->parent == z->parent->parent->left) {
+      node_t *y = z->parent->parent->right; // 삼촌 노드
+      if (y->color == RBTREE_RED) {
+        // Case 1: 삼촌이 빨간색
+        z->parent->color = RBTREE_BLACK;
+        y->color = RBTREE_BLACK;
+        z->parent->parent->color = RBTREE_RED;
+        z = z->parent->parent;
+      } else {
+        if (z == z->parent->right) {
+          // Case 2: 삼촌이 검은색이고 새 노드가 오른쪽 자식
+          z = z->parent;
+          left_rotate(t, z);
+        }
+        // Case 3: 삼촌이 검은색이고 새 노드가 왼쪽 자식
+        z->parent->color = RBTREE_BLACK;
+        z->parent->parent->color = RBTREE_RED;
+        right_rotate(t, z->parent->parent);
+      }
+    } else {
+      // 삼촌 노드가 왼쪽에 있을 경우를 위한 대칭적인 처리
+      node_t *y = z->parent->parent->left;
+      if (y->color == RBTREE_RED) {
+        // Case 1
+        z->parent->color = RBTREE_BLACK;
+        y->color = RBTREE_BLACK;
+        z->parent->parent->color = RBTREE_RED;
+        z = z->parent->parent;
+      } else {
+        if (z == z->parent->left) {
+          // Case 2
+          z = z->parent;
+          right_rotate(t, z);
+        }
+        // Case 3
+        z->parent->color = RBTREE_BLACK;
+        z->parent->parent->color = RBTREE_RED;
+        left_rotate(t, z->parent->parent);
+      }
+    }
+    t->root->color = RBTREE_BLACK; // 루트는 항상 검은색이어야 함
+  }
 }
 
 
